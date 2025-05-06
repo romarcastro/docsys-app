@@ -6,7 +6,7 @@ type Prescription = {
   name: string;
   dateOfPrescription: string;
   doctorInformation: string;
-  instructions: string;
+  createdAt: string;
 };
 
 const AllPrescriptions: React.FC = () => {
@@ -86,7 +86,7 @@ const AllPrescriptions: React.FC = () => {
 
       <main className="ml-[300px] pt-28 justify-center h-full px-8">
         <h2 className="text-lg font-semibold text-[#0077B6] mb-6">
-          Prescriptions
+          All Prescriptions
         </h2>
 
         <div className="mb-4 flex justify-between items-center">
@@ -131,20 +131,18 @@ const AllPrescriptions: React.FC = () => {
           </div>
         </div>
 
-
         <table className="w-full text-sm border-collapse ">
           <thead>
             <tr className=" bg-gray-100">
-
               <th
-                className="border px-2 py-1 cursor-pointer"
+                className="border-b px-5 py-1 cursor-pointer text-start"
                 onClick={() => handleSort("name")}
               >
                 Patient Name{" "}
                 {sortKey === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
               </th>
               <th
-                className="border px-2 py-1 cursor-pointer"
+                className="border-b px-2 py-2 cursor-pointer text-start "
                 onClick={() => handleSort("dateOfPrescription")}
               >
                 Date{" "}
@@ -154,22 +152,35 @@ const AllPrescriptions: React.FC = () => {
                     : "▼"
                   : ""}
               </th>
-              <th className="border px-2 py-1">Doctor</th>
-              <th className="border px-2 py-1">Instructions</th>
+              <th className="border-b px-2 py-1 text-start">Time</th>
+              <th className="border-b px-2 py-1 text-start">Doctor</th>
             </tr>
           </thead>
           <tbody>
             {sortedPrescriptions.map((prescription, index) => (
-              <tr key={index}>
-                <td className="border px-2 py-1">{prescription.name}</td>
-                <td className="border px-2 py-1">
-                  {prescription.dateOfPrescription}
+              <tr
+                key={index}
+                className="hover:bg-gray-100 ease-in duration-50 cursor-pointer"
+              >
+                <td className="border-b px-5 py-5">{prescription.name}</td>
+                <td className="border-b px-2 py-1">
+                  {new Date(prescription.dateOfPrescription).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}
                 </td>
-                <td className="border px-2 py-1">
+                <td className="border-b px-2 py-1">
+                  {new Date(prescription.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
+                <td className="border-b px-2 py-1">
                   {prescription.doctorInformation}
-                </td>
-                <td className="border px-2 py-1">
-                  {prescription.instructions}
                 </td>
               </tr>
             ))}
