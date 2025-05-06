@@ -22,10 +22,9 @@ import Navbar from "./components/Navbar";
 const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
-  const [patientType, setPatientType] = useState<"new" | "existing" | null>(
-    null
-  );
+  const [patientType, setPatientType] = useState<"new" | "existing" | null>(null);
   const [formData, setFormData] = useState({ name: "", age: "", gender: "" });
+  const isFormValid = formData.name && formData.age && formData.gender;
 
   const handlePatientType = (type: "new" | "existing") => {
     setPatientType(type);
@@ -37,7 +36,14 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   const handleWritePrescription = () => {
-    // redirect to another page (simulate)
+    if (patientType === "new") {
+      const { name, age, gender } = formData;
+      if (!name || !age || !gender) {
+        alert("Please fill out name, age, and gender.");
+        return;
+      }
+    }
+
     navigate("/create", { state: { patient: formData } });
     onClose();
   };
@@ -79,7 +85,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   className="flex flex-col items-center mt-4 border-2 border-gray-300 py-4 px-8 rounded-lg cursor-pointer hover:border-[#003459] transition ease-in"
                   onClick={() => handlePatientType("new")}
                 >
-                  <img src={newPatient} alt="" />
+                  <img src={newPatient} alt="New Patient" />
                   <label htmlFor="new-patient" className="ml-2">
                     New Patient
                   </label>
@@ -89,8 +95,8 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   className="flex flex-col items-center mt-4 border-2 border-gray-300 py-4 px-8  rounded-lg cursor-pointer hover:border-[#003459] transition ease-in"
                   onClick={() => handlePatientType("existing")}
                 >
-                  <img src={existingPatient} alt="" />
-                  <label htmlFor="new-patient" className="mt-3">
+                  <img src={existingPatient} alt="Existing Patient" />
+                  <label htmlFor="existing-patient" className="mt-3">
                     Existing Patient
                   </label>
                 </div>
@@ -100,9 +106,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           {step === 1 && patientType === "new" && (
             <div>
-              <h2 className="text-lg font-semibold mb-4">
-                New Patient Details
-              </h2>
+              <h2 className="text-lg font-semibold mb-4">New Patient Details</h2>
 
               <input
                 type="text"
@@ -148,12 +152,18 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </label>
               </div>
               <div className="flex gap-2">
-                <button
-                  className="bg-[#00538D] text-white px-4 py-2 rounded hover:bg-[#00528de7] transition ease-in"
-                  onClick={handleWritePrescription}
-                >
-                  Write Prescription
-                </button>
+              <button
+               className={`px-4 py-2 rounded transition ease-in ${
+                isFormValid
+                 ? "bg-[#00538D] text-white hover:bg-[#00528de7] cursor-pointer"
+                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+               onClick={handleWritePrescription}
+             disabled={!isFormValid}
+              >
+             Write Prescription
+              </button>
+
                 <button
                   className="border border-gray-400 text-[#00538D] px-4 py-2 rounded"
                   onClick={handleBack}

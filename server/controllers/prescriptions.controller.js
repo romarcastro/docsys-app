@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Prescription = require("../models/Prescriptions.js");
 const mongoose = require("mongoose");
 
