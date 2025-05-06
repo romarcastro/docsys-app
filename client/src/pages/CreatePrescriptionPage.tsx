@@ -300,7 +300,7 @@ const CreatePrescriptionPage: React.FC = () => {
                 setStep("confirm");
               }}
             >
-              Confirm
+              Next: Confirm Details
             </button>
           </>
         )}
@@ -342,14 +342,14 @@ const CreatePrescriptionPage: React.FC = () => {
                 onClick={() => setStep("edit")}
                 className="bg-gray-300 px-4 py-2 rounded"
               >
-                Edit
+                Go Back & Edit
               </button>
 
               <button
                 onClick={handleGeneratePrescription}
                 className="bg-[#0077B6] text-white px-4 py-2 rounded"
               >
-                Confirm
+                Confirm & Submit
               </button>
             </div>
           </div>
