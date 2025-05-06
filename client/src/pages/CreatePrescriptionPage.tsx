@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useUser } from "../contexts/UserContext";
 
 import add from "../assets/icons/add.svg";
 import Sidebar from "./components/Sidebar";
@@ -16,6 +17,37 @@ const CreatePrescriptionPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const patient = location.state?.patient;
+
+  // User
+  const { name } = useUser();
+  const formatName = (fullName: string) => {
+    if (!fullName) return "";
+
+    const parts = fullName.trim().split(/\s+/); // Split by spaces
+    const filteredParts: string[] = [];
+
+    parts.forEach((part, index) => {
+      const cleanPart = part.replace(/[^a-zA-Z]/g, ""); // Remove dots, commas, etc.
+      if (index === 0) {
+        filteredParts.push(part); // Always keep first name
+      } else if (cleanPart.length > 1) {
+        filteredParts.push(part); // Keep only real words
+      }
+      // Skip if cleanPart is 1 letter (initials)
+    });
+
+    return filteredParts.join(" ");
+  };
+
+  useEffect(() => {
+    if (name) {
+      const formattedName = formatName(name);
+      setNewPrescription((prev) => ({
+        ...prev,
+        doctorName: `Dr. ${formattedName}, MD`,
+      }));
+    }
+  }, [name]);
 
   // New prescription data
   const [newPrescription, setNewPrescription] = useState<{
@@ -48,7 +80,6 @@ const CreatePrescriptionPage: React.FC = () => {
       inscription: medicines,
     }));
   }, [medicines]);
-
   const handleGeneratePrescription = async () => {
     if (!patient) return;
 
@@ -59,7 +90,7 @@ const CreatePrescriptionPage: React.FC = () => {
       dateOfPrescription: newPrescription.date,
       inscription: newPrescription.inscription,
       instructions: newPrescription.instructions,
-      doctorInformation: newPrescription.doctorName || "Dr. Mark Doe, MD",
+      doctorInformation: newPrescription.doctorName,
     };
 
     try {
@@ -288,7 +319,9 @@ const CreatePrescriptionPage: React.FC = () => {
                     </h3>
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium">Dr. Mark Doe, MD</div>
+                    <div className="font-medium">
+                      Dr. {formatName(name)}, MD
+                    </div>
                     <div className="text-gray-600">2025-01234502</div>
                   </div>
                 </div>

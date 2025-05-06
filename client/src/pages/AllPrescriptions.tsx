@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../pages/components/Sidebar";
 import Navbar from "../pages/components/Navbar";
+import logo from "../assets/ignatius-logo.svg";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Medicine = {
+  name: string;
+  dosage: string;
+  frequency: number;
+  quantity: number;
+};
 
 type Prescription = {
   name: string;
+  age: number;
+  gender: string;
   dateOfPrescription: string;
   doctorInformation: string;
   createdAt: string;
+  inscription: Medicine[];
+  instructions: string;
 };
 
 const AllPrescriptions: React.FC = () => {
@@ -19,6 +32,10 @@ const AllPrescriptions: React.FC = () => {
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<Prescription | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -49,7 +66,15 @@ const AllPrescriptions: React.FC = () => {
       setSortOrder("asc");
     }
   };
+  const openModal = (prescription: Prescription) => {
+    setSelectedPrescription(prescription);
+    setIsModalOpen(true);
+  };
 
+  const closeModal = () => {
+    setSelectedPrescription(null);
+    setIsModalOpen(false);
+  };
   const handleSearch = () => {
     if (searchTerm.trim() === "") {
       setFilteredPrescriptions(prescriptions); // Show all
@@ -133,34 +158,43 @@ const AllPrescriptions: React.FC = () => {
 
         <table className="w-full text-sm border-collapse ">
           <thead>
-            <tr className=" bg-gray-100">
+            <tr className=" border-b">
               <th
-                className="border-b px-5 py-1 cursor-pointer text-start"
+                className="border-b px-5 py-1 cursor-pointer text-start text-xs text-gray-600"
                 onClick={() => handleSort("name")}
               >
-                Patient Name{" "}
+                PATIENT NAME{" "}
                 {sortKey === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
               </th>
               <th
-                className="border-b px-2 py-2 cursor-pointer text-start "
+                className="border-b px-2 py-2 cursor-pointer text-start text-xs text-gray-600"
                 onClick={() => handleSort("dateOfPrescription")}
               >
-                Date{" "}
+                DATE{" "}
                 {sortKey === "dateOfPrescription"
                   ? sortOrder === "asc"
                     ? "▲"
                     : "▼"
                   : ""}
               </th>
-              <th className="border-b px-2 py-1 text-start">Time</th>
-              <th className="border-b px-2 py-1 text-start">Doctor</th>
+              <th className="border-b px-2 py-1 text-start text-xs text-gray-600">
+                TIME
+              </th>
+              <th className="border-b px-2 py-1 text-start text-xs text-gray-600">
+                DOCTOR
+              </th>
             </tr>
           </thead>
           <tbody>
             {sortedPrescriptions.map((prescription, index) => (
               <tr
                 key={index}
-                className="hover:bg-gray-100 ease-in duration-50 cursor-pointer"
+                onClick={() => openModal(prescription)}
+                className="hover:bg-gray-50 ease-in duration-50 cursor-pointer opacity-0 translate-y-2 animate-fadeInUp"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animationFillMode: "forwards",
+                }}
               >
                 <td className="border-b px-5 py-5">{prescription.name}</td>
                 <td className="border-b px-2 py-1">
@@ -186,6 +220,125 @@ const AllPrescriptions: React.FC = () => {
             ))}
           </tbody>
         </table>
+        <AnimatePresence>
+          {/* Modal */}
+          {isModalOpen && selectedPrescription && (
+            <motion.div
+              key="overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+            >
+              <motion.div
+                key="modal-content"
+                initial={{ y: 100, scale: 0.95, opacity: 0 }}
+                animate={{ y: 0, scale: 1, opacity: 1 }}
+                exit={{ y: 100, scale: 0.95, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 15,
+                }}
+                className="bg-white rounded-xl shadow-lg p-8 w-full max-w-[550px] h-[700px] overflow-y-auto relative"
+              >
+                <button
+                  onClick={closeModal}
+                  className="absolute top-2 right-4 text-xl text-gray-600 hover:text-gray-900"
+                >
+                  ✕
+                </button>
+
+                <div className="text-center mb-6">
+                  <div className="flex justify-center mb-2">
+                    <img src={logo} className="w-40" />
+                  </div>
+                  <h2 className="font-semibold text-base mt-1">
+                    {" "}
+                    {selectedPrescription.doctorInformation}
+                  </h2>
+                  <p className="text-xs text-gray-700 italic">
+                    General Doctor, St. Ignatius Medical Center
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800 border-t border-b py-4 mb-4">
+                  <div>
+                    <h3 className="font-semibold text-xs">NAGA CITY</h3>
+                    <p className="text-xs italic">St. Ignatius Medical</p>
+                    <p className="text-xs italic">Naga City, 4400</p>
+                    <p className="text-xs italic">Philippines</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-xs">
+                      CONTACT INFORMATION
+                    </h3>
+                    <p className="text-xs italic">
+                      ignatiusmedicalcenter@gmail.com
+                    </p>
+                    <p className="text-xs italic">0912 345 6789</p>
+                    <p className="text-xs italic">(2) 123 456 78</p>
+                  </div>
+                </div>
+
+                <div className="flex mb-4 text-lg">
+                  <p className="flex items-center w-full justify-between">
+                    <span className="font-semibold text-[14px]">Name:</span>
+                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                      {selectedPrescription.name}
+                    </span>
+                  </p>
+                  <p className="flex items-center w-full justify-between ml-6">
+                    <span className="font-semibold text-[14px]">Age:</span>
+                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                      {selectedPrescription.age}
+                    </span>
+                  </p>
+                  <p className="flex items-center w-full justify-between ml-6">
+                    <span className="font-semibold text-[14px]">Sex:</span>
+                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                      {selectedPrescription.gender}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Rx and Medicine List */}
+                {/**/}
+                <div className="flex">
+                  <div>
+                    <div className="text-3xl font-bold mr-6 text-gray-700">
+                      ℞
+                    </div>
+                    <div className="text-base space-y-2 ml-10">
+                      {selectedPrescription.inscription.map((med, idx) => (
+                        <div key={idx}>
+                          <p>
+                            {idx + 1}. {med.name} — {med.dosage}
+                          </p>
+                          <p>
+                            Sig: {med.frequency}x/day, Quantity: {med.quantity}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-10 text-right text-sm">
+                  <p className="font-semibold">
+                    {selectedPrescription.doctorInformation}
+                  </p>
+                  <p>
+                    LICENSE NO. <span className="font-bold">123456</span>
+                  </p>
+                  <p>
+                    PTR NO.{" "}
+                    <span className="underline text-blue-600">7891011</span>
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

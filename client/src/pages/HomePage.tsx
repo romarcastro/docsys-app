@@ -8,7 +8,7 @@ import redirect from "../assets/icons/redirect.svg";
 import link from "../assets/icons/link.svg";
 import hospitalIcon from "../assets/icons/hospital-icon.svg";
 import recent from "../assets/icons/recent-prescriptions.svg";
-import close from "../assets/icons/close.svg";
+import logo from "../assets/ignatius-logo.svg";
 
 // images
 
@@ -22,7 +22,9 @@ import Navbar from "./components/Navbar";
 const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
-  const [patientType, setPatientType] = useState<"new" | "existing" | null>(null);
+  const [patientType, setPatientType] = useState<"new" | "existing" | null>(
+    null
+  );
   const [formData, setFormData] = useState({ name: "", age: "", gender: "" });
   const isFormValid = formData.name && formData.age && formData.gender;
 
@@ -67,11 +69,12 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           transition={{ duration: 0.3 }}
           className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md font-inter relative"
         >
-          <img
-            src={close}
-            className="absolute top-4 right-4 cursor-pointer"
+          <button
             onClick={onClose}
-          />
+            className="absolute top-4 right-4 cursor-pointertext-xl text-gray-600 hover:text-gray-900"
+          >
+            ✕
+          </button>
 
           {step === 0 && (
             <div>
@@ -106,7 +109,9 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           {step === 1 && patientType === "new" && (
             <div>
-              <h2 className="text-lg font-semibold mb-4">New Patient Details</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                New Patient Details
+              </h2>
 
               <input
                 type="text"
@@ -152,17 +157,17 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </label>
               </div>
               <div className="flex gap-2">
-              <button
-               className={`px-4 py-2 rounded transition ease-in ${
-                isFormValid
-                 ? "bg-[#00538D] text-white hover:bg-[#00528de7] cursor-pointer"
-                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-               onClick={handleWritePrescription}
-             disabled={!isFormValid}
-              >
-             Write Prescription
-              </button>
+                <button
+                  className={`px-4 py-2 rounded transition ease-in ${
+                    isFormValid
+                      ? "bg-[#00538D] text-white hover:bg-[#00528de7] cursor-pointer"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  onClick={handleWritePrescription}
+                  disabled={!isFormValid}
+                >
+                  Write Prescription
+                </button>
 
                 <button
                   className="border border-gray-400 text-[#00538D] px-4 py-2 rounded"
@@ -227,13 +232,37 @@ const formatName = (fullName: string) => {
 
 type Prescription = {
   name: string;
+  age: string;
+  gender: string;
   dateOfPrescription: string;
   doctorInformation: string;
+  inscription: Medicine[];
   instructions: string;
+  createdAt: string;
+};
+
+type Medicine = {
+  name: string;
+  dosage: string;
+  frequency: number;
+  quantity: number;
 };
 
 const HomePage: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+
+  // specific prescription modal
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<Prescription | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = (prescription: Prescription) => {
+    setSelectedPrescription(prescription);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setSelectedPrescription(null);
+    setIsModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -243,7 +272,11 @@ const HomePage: React.FC = () => {
         );
         const data = await res.json();
         if (res.ok) {
-          setPrescriptions(data.data);
+          const sortedData = data.data.sort(
+            (a: Prescription, b: Prescription) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          setPrescriptions(sortedData);
         } else {
           console.error("Fetch failed:", data.message);
         }
@@ -344,33 +377,59 @@ const HomePage: React.FC = () => {
                 <h1 className="text-sm font-medium text-[#1F4276]">View all</h1>
               </a>
             </div>
-            <table className="w-full text-sm border-collapse border">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-2 py-1">Patient Name</th>
-                  <th className="border px-2 py-1">Date</th>
-                  <th className="border px-2 py-1">Doctor</th>
-                  <th className="border px-2 py-1">Instructions</th>
+            <table className="w-full text-sm border-collapse ">
+              <thead className="">
+                <tr className="border-b">
+                  <th className="border-b px-2 py-2 text-start text-xs text-gray-600">
+                    PATIENT NAME
+                  </th>
+                  <th className="border-b px-2 py-1 text-start text-xs text-gray-600">
+                    DATE
+                  </th>
+                  <th className="border-b px-2 py-1 text-start text-xs text-gray-600">
+                    TIME
+                  </th>
+                  <th className="border-b px-2 py-1 text-start text-xs text-gray-600">
+                    DOCTOR
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {prescriptions.map((prescription, index) => (
-                  <tr key={index}>
-                    <td className="border px-2 py-1">{prescription.name}</td>
-                    <td className="border px-2 py-1">
-                      {prescription.dateOfPrescription}
+                {prescriptions.slice(0, 4).map((prescription, index) => (
+                  <tr
+                    key={index}
+                    className="opacity-0 translate-y-2 animate-fadeInUp hover:bg-gray-50 cursor-pointer"
+                    onClick={() => openModal(prescription)}
+                    style={{
+                      animationDelay: `${index * 100}ms`,
+                      animationFillMode: "forwards",
+                    }}
+                  >
+                    <td className="border-b px-2 py-3">{prescription.name}</td>
+                    <td className="border-b px-2 py-1">
+                      {new Date(
+                        prescription.dateOfPrescription
+                      ).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </td>
-                    <td className="border px-2 py-1">
+                    <td className="border-b px-2 py-1">
+                      {new Date(prescription.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="border-b px-2 py-1">
                       {prescription.doctorInformation}
-                    </td>
-                    <td className="border px-2 py-1">
-                      {prescription.instructions}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
           {/* aside */}
           <div className="flex flex-col gap-1 mx-10">
             <div className="px-5  w-[400px] bg-white rounded-lg">
@@ -448,6 +507,116 @@ const HomePage: React.FC = () => {
       </main>
 
       {showModal && <PrescriptionModal onClose={() => setShowModal(false)} />}
+      <AnimatePresence>
+        {/* Modal */}
+        {isModalOpen && selectedPrescription && (
+          <motion.div
+            key="modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-white rounded-xl shadow-lg p-8 w-full max-w-[550px] h-[700px] overflow-y-auto relative"
+            >
+              <button
+                onClick={closeModal}
+                className="absolute top-2 right-4 text-xl text-gray-600 hover:text-gray-900"
+              >
+                ✕
+              </button>
+
+              <div className="text-center mb-6">
+                <div className="flex justify-center mb-2">
+                  <img src={logo} className="w-40" />
+                </div>
+                <h2 className="font-semibold text-base mt-1">
+                  {" "}
+                  {selectedPrescription.doctorInformation}
+                </h2>
+                <p className="text-xs text-gray-700 italic">
+                  General Doctor, St. Ignatius Medical Center
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800 border-t border-b py-4 mb-4">
+                <div>
+                  <h3 className="font-semibold text-xs">NAGA CITY</h3>
+                  <p className="text-xs italic">St. Ignatius Medical</p>
+                  <p className="text-xs italic">Naga City, 4400</p>
+                  <p className="text-xs italic">Philippines</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-xs">CONTACT INFORMATION</h3>
+                  <p className="text-xs italic">
+                    ignatiusmedicalcenter@gmail.com
+                  </p>
+                  <p className="text-xs italic">0912 345 6789</p>
+                  <p className="text-xs italic">(2) 123 456 78</p>
+                </div>
+              </div>
+
+              <div className="flex mb-4 text-lg">
+                <p className="flex items-center w-full justify-between">
+                  <span className="font-semibold text-[14px]">Name:</span>
+                  <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                    {selectedPrescription.name}
+                  </span>
+                </p>
+                <p className="flex items-center w-full justify-between ml-6">
+                  <span className="font-semibold text-[14px]">Age:</span>
+                  <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                    {selectedPrescription.age}
+                  </span>
+                </p>
+                <p className="flex items-center w-full justify-between ml-6">
+                  <span className="font-semibold text-[14px]">Sex:</span>
+                  <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                    {selectedPrescription.gender}
+                  </span>
+                </p>
+              </div>
+
+              {/* Rx and Medicine List */}
+              {/**/}
+              <div className="flex">
+                <div>
+                  <div className="text-3xl font-bold mr-6 text-gray-700">℞</div>
+                  <div className="text-base space-y-2 ml-10">
+                    {selectedPrescription.inscription.map((med, idx) => (
+                      <div key={idx}>
+                        <p>
+                          {idx + 1}. {med.name} — {med.dosage}
+                        </p>
+                        <p>
+                          Sig: {med.frequency}x/day, Quantity: {med.quantity}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 text-right text-sm">
+                <p className="font-semibold">
+                  {selectedPrescription.doctorInformation}
+                </p>
+                <p>
+                  LICENSE NO. <span className="font-bold">123456</span>
+                </p>
+                <p>
+                  PTR NO.{" "}
+                  <span className="underline text-blue-600">7891011</span>
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
