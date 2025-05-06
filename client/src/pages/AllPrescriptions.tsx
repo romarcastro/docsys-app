@@ -11,10 +11,14 @@ type Prescription = {
 
 const AllPrescriptions: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<
+    Prescription[]
+  >([]);
   const [sortKey, setSortKey] = useState<"name" | "dateOfPrescription" | null>(
     null
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -25,6 +29,7 @@ const AllPrescriptions: React.FC = () => {
         const data = await res.json();
         if (res.ok) {
           setPrescriptions(data.data);
+          setFilteredPrescriptions(data.data); // Initialize both
         } else {
           console.error("Fetch failed:", data.message);
         }
@@ -36,25 +41,6 @@ const AllPrescriptions: React.FC = () => {
     fetchPrescriptions();
   }, []);
 
-  const sortedPrescriptions = [...prescriptions].sort((a, b) => {
-    if (!sortKey) return 0;
-    if (sortKey === "dateOfPrescription") {
-      // Compare as dates
-      const aDate = new Date(a.dateOfPrescription);
-      const bDate = new Date(b.dateOfPrescription);
-      if (aDate < bDate) return sortOrder === "asc" ? -1 : 1;
-      if (aDate > bDate) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    } else {
-      // Compare as strings
-      const aValue = a[sortKey];
-      const bValue = b[sortKey];
-      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    }
-  });
-
   const handleSort = (key: "name" | "dateOfPrescription") => {
     if (sortKey === key) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -63,6 +49,35 @@ const AllPrescriptions: React.FC = () => {
       setSortOrder("asc");
     }
   };
+
+  const handleSearch = () => {
+    if (searchTerm.trim() === "") {
+      setFilteredPrescriptions(prescriptions); // Show all
+    } else {
+      const lowerSearch = searchTerm.toLowerCase();
+      const filtered = prescriptions.filter((prescription) =>
+        prescription.name.toLowerCase().includes(lowerSearch)
+      );
+      setFilteredPrescriptions(filtered);
+    }
+  };
+
+  const sortedPrescriptions = [...filteredPrescriptions].sort((a, b) => {
+    if (!sortKey) return 0;
+    if (sortKey === "dateOfPrescription") {
+      const aDate = new Date(a.dateOfPrescription);
+      const bDate = new Date(b.dateOfPrescription);
+      if (aDate < bDate) return sortOrder === "asc" ? -1 : 1;
+      if (aDate > bDate) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    } else {
+      const aValue = a[sortKey].toLowerCase();
+      const bValue = b[sortKey].toLowerCase();
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
 
   return (
     <div className="min-h-screen font-inter">
@@ -73,30 +88,49 @@ const AllPrescriptions: React.FC = () => {
         <h2 className="text-lg font-semibold text-[#0077B6] mb-6">
           All Prescriptions
         </h2>
-        <div className="mb-4 flex gap-2">
-          <button
-            onClick={() => handleSort("name")}
-            className={`px-3 py-1 border rounded ${
-              sortKey === "name" ? "bg-blue-100" : ""
-            }`}
-          >
-            Sort by Name{" "}
-            {sortKey === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-          </button>
-          <button
-            onClick={() => handleSort("dateOfPrescription")}
-            className={`px-3 py-1 border rounded ${
-              sortKey === "dateOfPrescription" ? "bg-blue-100" : ""
-            }`}
-          >
-            Sort by Date{" "}
-            {sortKey === "dateOfPrescription"
-              ? sortOrder === "asc"
-                ? "▲"
-                : "▼"
-              : ""}
-          </button>
+
+        <div className="mb-4 flex justify-between items-center">
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleSort("name")}
+              className={`px-3 py-1 border rounded ${
+                sortKey === "name" ? "bg-blue-100" : ""
+              }`}
+            >
+              Sort by Name{" "}
+              {sortKey === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+            </button>
+            <button
+              onClick={() => handleSort("dateOfPrescription")}
+              className={`px-3 py-1 border rounded ${
+                sortKey === "dateOfPrescription" ? "bg-blue-100" : ""
+              }`}
+            >
+              Sort by Date{" "}
+              {sortKey === "dateOfPrescription"
+                ? sortOrder === "asc"
+                  ? "▲"
+                  : "▼"
+                : ""}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search Patient"
+              className="border rounded px-3 py-1"
+            />
+            <button
+              onClick={handleSearch}
+              className="px-3 py-1 border rounded bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Search
+            </button>
+          </div>
         </div>
+
         <table className="w-full text-sm border-collapse ">
           <thead>
             <tr className=" bg-gray-100">
