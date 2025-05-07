@@ -127,7 +127,7 @@ const AllPrescriptions: React.FC = () => {
         );
         const medData = await res.json();
         if (res.ok) {
-          setMedicines(data.data);
+          setMedicines(medData.data);
           console.log(medData);
         } else {
           console.error("Fetch failed:", data.message);
