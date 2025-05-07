@@ -22,6 +22,19 @@ type Prescription = {
   instructions: string;
 };
 
+
+type fetchedMedicines = {
+  medicineId: string;
+  name: string;
+  brand: string;
+  dosageForm: string;
+  quantity: number;
+  price: number;
+  expirationDate: date; 
+  //prescriptionRequired: boolean;
+  description: string; 
+};
+
 const AllPrescriptions: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [filteredPrescriptions, setFilteredPrescriptions] = useState<
@@ -103,6 +116,29 @@ const AllPrescriptions: React.FC = () => {
       return 0;
     }
   });
+
+  const [medicines, setMedicines] = useState<Medicines[]>([]);
+// Fetch Medicines
+   useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const res = await fetch(
+          "https://pims-d.onrender.com/inventory"
+        );
+        const medData = await res.json();
+        if (res.ok) {
+          setMedicines(data.data);
+          console.log(medData);
+        } else {
+          console.error("Fetch failed:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching medicines:", err);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   return (
     <div className="min-h-screen font-inter">
@@ -339,6 +375,8 @@ const AllPrescriptions: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        
       </main>
     </div>
   );
