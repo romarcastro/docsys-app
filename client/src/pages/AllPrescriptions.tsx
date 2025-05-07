@@ -23,14 +23,14 @@ type Prescription = {
 };
 
 
-type fetchedMedicines = {
+type fetchedMedicine = {
   medicineId: string;
   name: string;
   brand: string;
   dosageForm: string;
   quantity: number;
   price: number;
-  expirationDate: date; 
+  // expirationDate: date; 
   //prescriptionRequired: boolean;
   description: string; 
 };
@@ -117,7 +117,7 @@ const AllPrescriptions: React.FC = () => {
     }
   });
 
-  const [medicines, setMedicines] = useState<Medicines[]>([]);
+  const [medicines, setMedicines] = useState<fetchedMedicine[]>([]);
 // Fetch Medicines
    useEffect(() => {
     const fetchMedicines = async () => {
