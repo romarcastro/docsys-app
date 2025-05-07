@@ -163,7 +163,7 @@ const AllPrescriptions: React.FC = () => {
         );
         const patientData = await res.json();
         if (res.ok) {
-          setPatient(patientData.data);
+          setPatients(patientData.data);
           console.log(patientData);
           console.log(patients);
         } else {
