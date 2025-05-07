@@ -100,17 +100,7 @@ const AllPrescriptions: React.FC = () => {
     }
   };
 
-  const handleSearchMedicine = () => {
-    if (searchTerm.trim() === "") {
-      setFilteredMedicines(medicines); // Show all
-    } else {
-      const lowerSearch = searchTerm.toLowerCase();
-      // const filtered = medicines.filter((prescription) =>
-      //   prescription.name.toLowerCase().includes(lowerSearch)
-      // );
-      setFilteredMedicines(filtered);
-    }
-  };
+
 
   const sortedPrescriptions = [...filteredPrescriptions].sort((a, b) => {
     if (!sortKey) return 0;
