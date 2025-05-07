@@ -100,6 +100,18 @@ const AllPrescriptions: React.FC = () => {
     }
   };
 
+  const handleSearchMedicine = () => {
+    if (searchTerm.trim() === "") {
+      setFilteredMedicines(medicines); // Show all
+    } else {
+      const lowerSearch = searchTerm.toLowerCase();
+      // const filtered = medicines.filter((prescription) =>
+      //   prescription.name.toLowerCase().includes(lowerSearch)
+      // );
+      setFilteredMedicines(filtered);
+    }
+  };
+
   const sortedPrescriptions = [...filteredPrescriptions].sort((a, b) => {
     if (!sortKey) return 0;
     if (sortKey === "dateOfPrescription") {
@@ -118,6 +130,9 @@ const AllPrescriptions: React.FC = () => {
   });
 
   const [medicines, setMedicines] = useState<fetchedMedicine[]>([]);
+  const [filteredMedicines, setFilteredMedicines] = useState<
+    fetchedMedicine[]
+  >([]);
 // Fetch Medicines
    useEffect(() => {
     const fetchMedicines = async () => {
@@ -130,7 +145,7 @@ const AllPrescriptions: React.FC = () => {
           setMedicines(medData.data);
           console.log(medData);
         } else {
-          console.error("Fetch failed:", data.message);
+          console.error("Fetch failed:", medData.message);
         }
       } catch (err) {
         console.error("Error fetching medicines:", err);
