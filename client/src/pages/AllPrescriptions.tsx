@@ -35,6 +35,13 @@ type fetchedMedicine = {
   description: string; 
 };
 
+
+type fetchedPatients = {
+  patient_id: string;
+  patient_name: string;
+
+};
+
 const AllPrescriptions: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [filteredPrescriptions, setFilteredPrescriptions] = useState<
@@ -143,6 +150,33 @@ const AllPrescriptions: React.FC = () => {
 
     fetchMedicines();
   }, []);
+
+
+   const [patients, setPatients] = useState<fetchedMedicine[]>([]);
+
+// Fetch Patients
+   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const res = await fetch(
+          "https://prms-test.onrender.com/api/patients"
+        );
+        const patientData = await res.json();
+        if (res.ok) {
+          setMedicines(patientData.data);
+          console.log(patientData);
+          console.log(patients);
+        } else {
+          console.error("Fetch failed:", patientData.message);
+        }
+      } catch (err) {
+        console.error("Error fetching patients:", err);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
 
   return (
     <div className="min-h-screen font-inter">
