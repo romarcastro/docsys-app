@@ -152,7 +152,7 @@ const AllPrescriptions: React.FC = () => {
   }, []);
 
 
-   const [patients, setPatients] = useState<fetchedMedicine[]>([]);
+   const [patients, setPatients] = useState<fetchedPatients[]>([]);
 
 // Fetch Patients
    useEffect(() => {
@@ -163,7 +163,7 @@ const AllPrescriptions: React.FC = () => {
         );
         const patientData = await res.json();
         if (res.ok) {
-          setMedicines(patientData.data);
+          setPatient(patientData.data);
           console.log(patientData);
           console.log(patients);
         } else {
