@@ -17,7 +17,6 @@ const prescriptionsSchema = new mongoose.Schema(
     age: { type: Number, required: true },
     gender: { type: String, required: true },
     dateOfPrescription: { type: String, required: true },
-    email: { type: String, required: true },
 
     // Updated: array of medicine objects
     inscription: {
