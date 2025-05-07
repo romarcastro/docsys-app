@@ -120,9 +120,7 @@ const AllPrescriptions: React.FC = () => {
   });
 
   const [medicines, setMedicines] = useState<fetchedMedicine[]>([]);
-  const [filteredMedicines, setFilteredMedicines] = useState<
-    fetchedMedicine[]
-  >([]);
+
 // Fetch Medicines
    useEffect(() => {
     const fetchMedicines = async () => {
@@ -134,6 +132,7 @@ const AllPrescriptions: React.FC = () => {
         if (res.ok) {
           setMedicines(medData.data);
           console.log(medData);
+          console.log(medicines);
         } else {
           console.error("Fetch failed:", medData.message);
         }
