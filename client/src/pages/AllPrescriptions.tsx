@@ -3,7 +3,6 @@ import Sidebar from "../pages/components/Sidebar";
 import Navbar from "../pages/components/Navbar";
 import logo from "../assets/ignatius-logo.svg";
 import { motion, AnimatePresence } from "framer-motion";
-import MedicinesList from "./components/MedicineList";
 
 type Medicine = {
   name: string;
@@ -21,18 +20,6 @@ type Prescription = {
   createdAt: string;
   inscription: Medicine[];
   instructions: string;
-};
-
-type fetchedMedicine = {
-  medicineId: string;
-  name: string;
-  brand: string;
-  dosageForm: string;
-  quantity: number;
-  price: number;
-  // expirationDate: date;
-  //prescriptionRequired: boolean;
-  description: string;
 };
 
 type fetchedPatients = {
