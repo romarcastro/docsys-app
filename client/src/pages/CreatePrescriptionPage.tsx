@@ -234,15 +234,7 @@ const CreatePrescriptionPage: React.FC = () => {
                       className="w-full mt-1 border rounded p-2 text-sm"
                     />
                   </div>
-                  {/* <button
-                className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium py-2 rounded text-sm mt-2"
-                onClick={handleGeneratePrescription}
-              >
-                Generate Prescription
-              </button> */}
                 </div>
-
-                {/* Inscription Section */}
                 {/* Inscription Section */}
                 <div className="bg-[#f9f9f9] p-4 rounded border w-full min-w-max flex-1">
                   <div className="flex justify-between items-center mb-2">
