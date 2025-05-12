@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "../pages/components/Sidebar";
 import Navbar from "../pages/components/Navbar";
 import logo from "../assets/ignatius-logo.svg";
 import { motion, AnimatePresence } from "framer-motion";
+import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
 
 type Medicine = {
   name: string;
@@ -41,6 +43,8 @@ const AllPrescriptions: React.FC = () => {
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -131,6 +135,38 @@ const AllPrescriptions: React.FC = () => {
 
     fetchPatients();
   }, []);
+
+  const handleDownloadPDF = () => {
+    const downloadBtn = document.getElementById("download-pdf-btn");
+    if (downloadBtn) downloadBtn.classList.add("no-pdf");
+
+    if (modalContentRef.current) {
+      html2pdf()
+        .from(modalContentRef.current)
+        .set({
+          margin: 0.5,
+          filename: `${selectedPrescription?.name || "prescription"}.pdf`,
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        })
+        .save()
+        .then(() => {
+          if (downloadBtn) downloadBtn.classList.remove("no-pdf");
+        });
+    } else {
+      if (downloadBtn) downloadBtn.classList.remove("no-pdf");
+    }
+  };
+
+  const handleDownloadPNG = async () => {
+    if (modalContentRef.current) {
+      const canvas = await html2canvas(modalContentRef.current);
+      const link = document.createElement("a");
+      link.download = `${selectedPrescription?.name || "prescription"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+  };
 
   return (
     <div className="min-h-screen font-inter">
@@ -258,112 +294,132 @@ const AllPrescriptions: React.FC = () => {
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
             >
-              <motion.div
-                key="modal-content"
-                initial={{ y: 100, scale: 0.95, opacity: 0 }}
-                animate={{ y: 0, scale: 1, opacity: 1 }}
-                exit={{ y: 100, scale: 0.95, opacity: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 15,
-                }}
-                className="bg-white rounded-xl shadow-lg p-8 w-full max-w-[550px] h-[700px] overflow-y-auto relative"
-              >
-                <button
-                  onClick={closeModal}
-                  className="absolute top-2 right-4 text-xl text-gray-600 hover:text-gray-900"
+              {/* Fixed width wrapper for modal and buttons */}
+              <div className="relative w-[550px]">
+                <motion.div
+                  key="modal-content"
+                  initial={{ y: 100, scale: 0.95, opacity: 0 }}
+                  animate={{ y: 0, scale: 1, opacity: 1 }}
+                  exit={{ y: 100, scale: 0.95, opacity: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 120,
+                    damping: 15,
+                  }}
+                  ref={modalContentRef}
+                  className="bg-white rounded-xl shadow-lg p-8 w-full max-w-[550px] h-[700px] overflow-y-auto relative"
                 >
-                  ✕
-                </button>
+                  <button
+                    onClick={closeModal}
+                    className="absolute top-2 right-4 text-xl text-gray-600 hover:text-gray-900"
+                  >
+                    ✕
+                  </button>
 
-                <div className="text-center mb-6">
-                  <div className="flex justify-center mb-2">
-                    <img src={logo} className="w-40" />
-                  </div>
-                  <h2 className="font-semibold text-base mt-1">
-                    {" "}
-                    {selectedPrescription.doctorInformation}
-                  </h2>
-                  <p className="text-xs text-gray-700 italic">
-                    General Doctor, St. Ignatius Medical Center
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800 border-t border-b py-4 mb-4">
-                  <div>
-                    <h3 className="font-semibold text-xs">NAGA CITY</h3>
-                    <p className="text-xs italic">St. Ignatius Medical</p>
-                    <p className="text-xs italic">Naga City, 4400</p>
-                    <p className="text-xs italic">Philippines</p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-xs">
-                      CONTACT INFORMATION
-                    </h3>
-                    <p className="text-xs italic">
-                      ignatiusmedicalcenter@gmail.com
+                  <div className="text-center mb-6">
+                    <div className="flex justify-center mb-2">
+                      <img src={logo} className="w-40" />
+                    </div>
+                    <h2 className="font-semibold text-base mt-1">
+                      {" "}
+                      {selectedPrescription.doctorInformation}
+                    </h2>
+                    <p className="text-xs text-gray-700 italic">
+                      General Doctor, St. Ignatius Medical Center
                     </p>
-                    <p className="text-xs italic">0912 345 6789</p>
-                    <p className="text-xs italic">(2) 123 456 78</p>
                   </div>
-                </div>
-
-                <div className="flex mb-4 text-lg">
-                  <p className="flex items-center w-full justify-between">
-                    <span className="font-semibold text-[14px]">Name:</span>
-                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
-                      {selectedPrescription.name}
-                    </span>
-                  </p>
-                  <p className="flex items-center w-full justify-between ml-6">
-                    <span className="font-semibold text-[14px]">Age:</span>
-                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
-                      {selectedPrescription.age}
-                    </span>
-                  </p>
-                  <p className="flex items-center w-full justify-between ml-6">
-                    <span className="font-semibold text-[14px]">Sex:</span>
-                    <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
-                      {selectedPrescription.gender}
-                    </span>
-                  </p>
-                </div>
-
-                {/* Rx and Medicine List */}
-                {/**/}
-                <div className="flex">
-                  <div>
-                    <div className="text-3xl font-bold mr-6 text-gray-700">
-                      ℞
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800 border-t border-b py-4 mb-4">
+                    <div>
+                      <h3 className="font-semibold text-xs">NAGA CITY</h3>
+                      <p className="text-xs italic">St. Ignatius Medical</p>
+                      <p className="text-xs italic">Naga City, 4400</p>
+                      <p className="text-xs italic">Philippines</p>
                     </div>
-                    <div className="text-base space-y-2 ml-10">
-                      {selectedPrescription.inscription.map((med, idx) => (
-                        <div key={idx}>
-                          <p>
-                            {idx + 1}. {med.name} — {med.dosage}
-                          </p>
-                          <p>
-                            Sig: {med.frequency}x/day, Quantity: {med.quantity}
-                          </p>
-                        </div>
-                      ))}
+                    <div>
+                      <h3 className="font-semibold text-xs">
+                        CONTACT INFORMATION
+                      </h3>
+                      <p className="text-xs italic">
+                        ignatiusmedicalcenter@gmail.com
+                      </p>
+                      <p className="text-xs italic">0912 345 6789</p>
+                      <p className="text-xs italic">(2) 123 456 78</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-10 text-right text-sm">
-                  <p className="font-semibold">
-                    {selectedPrescription.doctorInformation}
-                  </p>
-                  <p>
-                    LICENSE NO. <span className="font-bold">123456</span>
-                  </p>
-                  <p>
-                    PTR NO.{" "}
-                    <span className="underline text-blue-600">7891011</span>
-                  </p>
-                </div>
-              </motion.div>
+                  <div className="flex mb-4 text-lg">
+                    <p className="flex items-center w-full justify-between">
+                      <span className="font-semibold text-[14px]">Name:</span>
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                        {selectedPrescription.name}
+                      </span>
+                    </p>
+                    <p className="flex items-center w-full justify-between ml-6">
+                      <span className="font-semibold text-[14px]">Age:</span>
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                        {selectedPrescription.age}
+                      </span>
+                    </p>
+                    <p className="flex items-center w-full justify-between ml-6">
+                      <span className="font-semibold text-[14px]">Sex:</span>
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                        {selectedPrescription.gender}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Rx and Medicine List */}
+                  {/**/}
+                  <div className="flex">
+                    <div>
+                      <div className="text-3xl font-bold mr-6 text-gray-700">
+                        ℞
+                      </div>
+                      <div className="text-base space-y-2 ml-10">
+                        {selectedPrescription.inscription.map((med, idx) => (
+                          <div key={idx}>
+                            <p>
+                              {idx + 1}. {med.name} — {med.dosage}
+                            </p>
+                            <p>
+                              Sig: {med.frequency}x/day, Quantity:{" "}
+                              {med.quantity}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-10 text-right text-sm">
+                    <p className="font-semibold">
+                      {selectedPrescription.doctorInformation}
+                    </p>
+                    <p>
+                      LICENSE NO. <span className="font-bold">123456</span>
+                    </p>
+                    <p>
+                      PTR NO.{" "}
+                      <span className="underline text-blue-600">7891011</span>
+                    </p>
+                  </div>
+                </motion.div>
+                {/* Download buttons*/}
+                <button
+                  id="download-pdf-btn"
+                  onClick={handleDownloadPDF}
+                  className="absolute top-4 -left-40 px-3 py-2 w-40 bg-blue-600 text-white rounded hover:bg-blue-500 z-50 text-base font-medium"
+                >
+                  Download PDF
+                </button>
+                <button
+                  id="download-png-btn"
+                  onClick={handleDownloadPNG}
+                  className="absolute top-20 -left-40 px-3 py-2 w-40 bg-blue-600 text-white rounded hover:bg-blue-500 z-50 text-base font-medium"
+                >
+                  Download PNG
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -373,3 +429,11 @@ const AllPrescriptions: React.FC = () => {
 };
 
 export default AllPrescriptions;
+
+<style>
+  {`
+  .no-pdf {
+    display: none !important;
+  }
+`}
+</style>;
