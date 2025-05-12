@@ -5,6 +5,8 @@ import CreatePrescriptionPage from "./pages/CreatePrescriptionPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import Prescriptions from "./pages/AllPrescriptions";
+import Medicines from "./pages/Medicines";
+import Patient from "./pages/Patients";
 import { UserProvider } from "./contexts/UserContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -38,6 +40,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Prescriptions />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/medicines"
+            element={
+              <ProtectedRoute>
+                <Medicines />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/patients"
+            element={
+              <ProtectedRoute>
+                <Patient />
               </ProtectedRoute>
             }
           />

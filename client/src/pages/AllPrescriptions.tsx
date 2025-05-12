@@ -3,6 +3,7 @@ import Sidebar from "../pages/components/Sidebar";
 import Navbar from "../pages/components/Navbar";
 import logo from "../assets/ignatius-logo.svg";
 import { motion, AnimatePresence } from "framer-motion";
+import MedicinesList from "./components/MedicineList";
 
 type Medicine = {
   name: string;
@@ -22,7 +23,6 @@ type Prescription = {
   instructions: string;
 };
 
-
 type fetchedMedicine = {
   medicineId: string;
   name: string;
@@ -30,16 +30,14 @@ type fetchedMedicine = {
   dosageForm: string;
   quantity: number;
   price: number;
-  // expirationDate: date; 
+  // expirationDate: date;
   //prescriptionRequired: boolean;
-  description: string; 
+  description: string;
 };
-
 
 type fetchedPatients = {
   patient_id: string;
   patient_name: string;
-
 };
 
 const AllPrescriptions: React.FC = () => {
@@ -107,8 +105,6 @@ const AllPrescriptions: React.FC = () => {
     }
   };
 
-
-
   const sortedPrescriptions = [...filteredPrescriptions].sort((a, b) => {
     if (!sortKey) return 0;
     if (sortKey === "dateOfPrescription") {
@@ -126,41 +122,13 @@ const AllPrescriptions: React.FC = () => {
     }
   });
 
-  const [medicines, setMedicines] = useState<fetchedMedicine[]>([]);
+  const [patients, setPatients] = useState<fetchedPatients[]>([]);
 
-// Fetch Medicines
-   useEffect(() => {
-    const fetchMedicines = async () => {
-      try {
-        const res = await fetch(
-          "https://pims-d.onrender.com/inventory"
-        );
-        const medData = await res.json();
-        if (res.ok) {
-          setMedicines(medData.data);
-          console.log(medData);
-          console.log(medicines);
-        } else {
-          console.error("Fetch failed:", medData.message);
-        }
-      } catch (err) {
-        console.error("Error fetching medicines:", err);
-      }
-    };
-
-    fetchMedicines();
-  }, []);
-
-
-   const [patients, setPatients] = useState<fetchedPatients[]>([]);
-
-// Fetch Patients
-   useEffect(() => {
+  // Fetch Patients
+  useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const res = await fetch(
-          "https://prms-test.onrender.com/api/patients"
-        );
+        const res = await fetch("https://prms-test.onrender.com/api/patients");
         const patientData = await res.json();
         if (res.ok) {
           setPatients(patientData.data);
@@ -176,7 +144,6 @@ const AllPrescriptions: React.FC = () => {
 
     fetchPatients();
   }, []);
-
 
   return (
     <div className="min-h-screen font-inter">
@@ -413,8 +380,6 @@ const AllPrescriptions: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-        
       </main>
     </div>
   );
