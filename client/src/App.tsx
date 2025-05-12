@@ -44,23 +44,9 @@ function App() {
             }
           />
 
-          <Route
-            path="/medicines"
-            element={
-              <ProtectedRoute>
-                <Medicines />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/medicines" element={<Medicines />} />
 
-          <Route
-            path="/patients"
-            element={
-              <ProtectedRoute>
-                <Patient />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/patients" element={<Patient />} />
         </Routes>
       </UserProvider>
     </div>
