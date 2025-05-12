@@ -318,7 +318,7 @@ const HomePage: React.FC = () => {
         .from(modalContentRef.current)
         .set({
           margin: 0.5,
-          filename: `${selectedPrescription?.name || "prescription"}.pdf`,
+          filename: `${selectedPrescription?.name || "prescription"} Prescription.pdf`,
           html2canvas: { scale: 2 },
           jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
         })
@@ -335,7 +335,7 @@ const HomePage: React.FC = () => {
     if (modalContentRef.current) {
       const canvas = await html2canvas(modalContentRef.current);
       const link = document.createElement("a");
-      link.download = `${selectedPrescription?.name || "prescription"}.png`;
+      link.download = `${selectedPrescription?.name || "prescription"} Prescription.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     }
