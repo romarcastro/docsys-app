@@ -7,9 +7,16 @@ import add from "../assets/icons/add.svg";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import rx from "../assets/icons/rx-icon.svg";
+
 const CreatePrescriptionPage: React.FC = () => {
   const [medicines, setMedicines] = useState<
-    { name: string; dosage: string; frequency: number; quantity: number }[]
+    {
+      name: string;
+      brand: string;
+      dosageForm: string;
+      frequency: number;
+      quantity: number;
+    }[]
   >([]);
   const [step, setStep] = useState<"edit" | "confirm">("edit");
   const [showModal, setShowModal] = useState(false);
@@ -18,7 +25,7 @@ const CreatePrescriptionPage: React.FC = () => {
   const location = useLocation();
   const patient = location.state?.patient;
 
-  // User
+  // Username
   const { name } = useUser();
   const formatName = (fullName: string) => {
     if (!fullName) return "";
@@ -59,7 +66,8 @@ const CreatePrescriptionPage: React.FC = () => {
     instructions: string;
     inscription: {
       name: string;
-      dosage: string;
+      brand: string;
+      dosageForm: string;
       frequency: number;
       quantity: number;
     }[];
@@ -92,7 +100,7 @@ const CreatePrescriptionPage: React.FC = () => {
       instructions: newPrescription.instructions,
       doctorInformation: newPrescription.doctorName,
     };
-
+    // Fetch Prescriptions
     try {
       const response = await fetch(
         "https://docsys-app-server.onrender.com/api/prescriptions",
@@ -130,20 +138,68 @@ const CreatePrescriptionPage: React.FC = () => {
     }
   };
 
-  const dummyMedicineDB = [
-    { name: "Paracetamol", dosage: "500mg", description: "Pain Reliever" },
-    { name: "Amoxicillin", dosage: "250mg", description: "Antibiotic" },
-    { name: "Ibuprofen", dosage: "400mg", description: "Anti-Inflammatory" },
-    { name: "Cetirizine", dosage: "10mg", description: "Allergy Relief" },
-    { name: "Loperamide", dosage: "2mg", description: "Treats Diarrhea" },
-    { name: "Metformin", dosage: "500mg", description: "Diabetes Management" },
-    { name: "Omeprazole", dosage: "20mg", description: "Stomach Acid Reducer" },
-  ];
+  interface Medicine {
+    medicineId: string;
+    name: string;
+    brand: string;
+    dosageForm: string;
+  }
+  const [medicineDB, setMedicinesDB] = useState<Medicine[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const res = await fetch("https://pims-d.onrender.com/inventory");
+        console.log("Response status:", res.status);
+        const data = await res.json();
+        console.log("Fetched data:", data);
+
+        if (res.ok && Array.isArray(data.data)) {
+          setMedicinesDB(data.data);
+        } else if (res.ok && Array.isArray(data)) {
+          setMedicinesDB(data); // fallback if API returns array directly
+        } else {
+          setError("Unexpected response format or no medicines found.");
+        }
+      } catch (err) {
+        console.error("Error fetching medicines:", err);
+        setError("Failed to fetch medicines.");
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   function handleAddMedicine(): void {
     setShowModal(true);
   }
 
+  // Get Date
+  const [dateTime, setDateTime] = useState<string>("");
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = now.toLocaleDateString(undefined, options);
+
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+
+      const formattedTime = `${hours}:${minutes} ${ampm}`;
+      setDateTime(`Date: ${formattedDate} Time: ${formattedTime}`);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="min-h-screen font-inter">
       <Sidebar />
@@ -173,7 +229,10 @@ const CreatePrescriptionPage: React.FC = () => {
                 <div className="text-sm flex flex-col gap-1">
                   <div>
                     Prescription Date:{" "}
-                    <span className="font-medium">January 20, 2025</span>
+                    <span className="font-medium">
+                      {" "}
+                      {dateTime.split("Date: ")[1]?.split(" Time:")[0]}
+                    </span>
                   </div>
                   <div>
                     Prescription Type:{" "}
@@ -192,6 +251,7 @@ const CreatePrescriptionPage: React.FC = () => {
                     </label>
                     <textarea
                       value={newPrescription.symptoms}
+                      required
                       onChange={(e) =>
                         setNewPrescription({
                           ...newPrescription,
@@ -208,6 +268,7 @@ const CreatePrescriptionPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
+                      required
                       value={newPrescription.subscription}
                       onChange={(e) =>
                         setNewPrescription({
@@ -245,11 +306,16 @@ const CreatePrescriptionPage: React.FC = () => {
                   </div>
 
                   <div className="text-sm">
-                    <div className="flex justify-between font-semibold border-b pb-1 mb-1">
+                    <div className="flex font-semibold border-b pb-1 mb-1">
                       <span className="font-medium w-1/4">Drug Name</span>
+                      <span className="font-medium w-1/6">Brand</span>
                       <span className="font-medium w-1/6">Dosage</span>
-                      <span className="font-medium w-1/6">Frequency</span>
-                      <span className="font-medium w-1/6">Quantity</span>
+                      <span className="font-medium w-1/6 text-center">
+                        Frequency
+                      </span>
+                      <span className="font-medium w-1/6 text-center">
+                        Quantity
+                      </span>
                       <span className="font-medium w-1/6 text-center">
                         Action
                       </span>
@@ -261,31 +327,94 @@ const CreatePrescriptionPage: React.FC = () => {
                         className="flex justify-between items-center mb-1"
                       >
                         <span className="w-1/4">{med.name}</span>
-                        <span className="w-1/6">{med.dosage}</span>
+                        <span className="w-1/6">{med.brand}</span>
+                        <span className="w-1/6">{med.dosageForm}</span>
 
-                        <input
-                          type="number"
-                          className="w-1/6 px-2 bg-transparent border rounded"
-                          value={med.frequency}
-                          onChange={(e) => {
-                            const updated = [...medicines];
-                            updated[index].frequency =
-                              parseInt(e.target.value) || 0;
-                            setMedicines(updated);
-                          }}
-                        />
+                        <div className="w-1/6 flex justify-center items-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...medicines];
+                              updated[index].frequency = Math.max(
+                                0,
+                                updated[index].frequency - 1
+                              );
+                              setMedicines(updated);
+                            }}
+                            className="w-6 h-6 flex justify-center items-center bg-gray-200 rounded-full hover:bg-gray-300"
+                          >
+                            −
+                          </button>
 
-                        <input
-                          type="number"
-                          className="w-1/6 px-2 bg-transparent border rounded"
-                          value={med.quantity}
-                          onChange={(e) => {
-                            const updated = [...medicines];
-                            updated[index].quantity =
-                              parseInt(e.target.value) || 0;
-                            setMedicines(updated);
-                          }}
-                        />
+                          <input
+                            type="number"
+                            className="w-5 text-center bg-transparent rounded appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            value={med.frequency}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              const updated = [...medicines];
+                              updated[index].frequency = value >= 0 ? value : 0;
+                              setMedicines(updated);
+                            }}
+                            min={0}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...medicines];
+                              updated[index].frequency =
+                                updated[index].frequency + 1;
+                              setMedicines(updated);
+                            }}
+                            className="w-6 h-6 flex justify-center items-center bg-gray-200 rounded-full hover:bg-gray-300"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <div className="w-1/6 flex justify-center items-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...medicines];
+                              updated[index].quantity = Math.max(
+                                0,
+                                updated[index].quantity - 1
+                              );
+                              setMedicines(updated);
+                            }}
+                            className="w-6 h-6 flex justify-center items-center bg-gray-200 rounded-full hover:bg-gray-300"
+                          >
+                            −
+                          </button>
+
+                          <input
+                            type="number"
+                            value={med.quantity}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              const updated = [...medicines];
+                              updated[index].quantity = value >= 0 ? value : 0;
+                              setMedicines(updated);
+                            }}
+                            min={0}
+                            className="w-5 text-center bg-transparent rounded appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...medicines];
+                              updated[index].quantity =
+                                updated[index].quantity + 1;
+                              setMedicines(updated);
+                            }}
+                            className="w-6 h-6 flex justify-center items-center bg-gray-200 rounded-full hover:bg-gray-300"
+                          >
+                            +
+                          </button>
+                        </div>
 
                         <button
                           onClick={() => {
@@ -320,12 +449,45 @@ const CreatePrescriptionPage: React.FC = () => {
               </div>
             </div>
             <button
-              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium py-2 rounded text-sm mt-4"
+              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium p-2 rounded text-sm mt-4"
               onClick={() => {
+                const { symptoms, subscription, instructions } =
+                  newPrescription;
+
+                const isValidPrescription =
+                  symptoms.trim() && subscription.trim() && instructions.trim();
+
+                const isValidMedicines =
+                  medicines.length > 0 &&
+                  medicines.every(
+                    (med) => med.frequency > 0 && med.quantity > 0
+                  );
+
+                if (!isValidPrescription) {
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Missing Fields",
+                    text: "Please fill in all required prescription fields.",
+                    confirmButtonColor: "#0077B6",
+                  });
+                  return;
+                }
+
+                if (!isValidMedicines) {
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Incomplete Medicines",
+                    text: "Please make sure all medicines have frequency and quantity.",
+                    confirmButtonColor: "#0077B6",
+                  });
+                  return;
+                }
+
+                // All validations passed
                 setStep("confirm");
               }}
             >
-              Next: Confirm Details
+              Confirm Details
             </button>
           </>
         )}
@@ -355,7 +517,7 @@ const CreatePrescriptionPage: React.FC = () => {
               <ul className="list-disc list-inside">
                 {medicines.map((med, index) => (
                   <li key={index}>
-                    {med.name} - {med.dosage} - {med.frequency}x/day -{" "}
+                    {med.name} - {med.dosageForm} - {med.frequency}x/day -{" "}
                     {med.quantity} pcs
                   </li>
                 ))}
@@ -390,18 +552,18 @@ const CreatePrescriptionPage: React.FC = () => {
                     <tr>
                       <th className="border px-2 py-1 text-left">Drug Name</th>
                       <th className="border px-2 py-1 text-left">Dosage</th>
-                      <th className="border px-2 py-1 text-left">
-                        Description
-                      </th>
+                      <th className="border px-2 py-1 text-left">Brand</th>
+
                       <th className="border px-2 py-1 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dummyMedicineDB.map((drug, index) => (
+                    {medicineDB.map((drug, index) => (
                       <tr key={index}>
                         <td className="border px-2 py-1">{drug.name}</td>
-                        <td className="border px-2 py-1">{drug.dosage}</td>
-                        <td className="border px-2 py-1">{drug.description}</td>
+                        <td className="border px-2 py-1">{drug.dosageForm}</td>
+                        <td className="border px-2 py-1">{drug.brand}</td>
+
                         <td className="border px-2 py-1 text-center">
                           <input
                             type="checkbox"
@@ -437,11 +599,14 @@ const CreatePrescriptionPage: React.FC = () => {
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded"
                   onClick={() => {
-                    const selectedDetails = dummyMedicineDB
+                    const selectedDetails = medicineDB
                       .filter((med) => selectedMedicines.includes(med.name))
                       .map((med) => ({
+                        medicineId: med.medicineId,
                         name: med.name,
-                        dosage: med.dosage,
+                        dosageForm: med.dosageForm,
+                        brand: med.brand,
+
                         frequency: 0,
                         quantity: 0,
                       }));
