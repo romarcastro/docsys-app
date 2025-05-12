@@ -1,4 +1,5 @@
 // MedicinesList.tsx
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 interface Medicine {
   _id: string;
@@ -20,10 +21,14 @@ const MedicinesList: React.FC = () => {
     const fetchMedicines = async () => {
       try {
         const res = await fetch("https://pims-d.onrender.com/inventory");
+        console.log("Response status:", res.status);
         const data = await res.json();
+        console.log("Fetched data:", data);
 
         if (res.ok && Array.isArray(data.data)) {
           setMedicines(data.data);
+        } else if (res.ok && Array.isArray(data)) {
+          setMedicines(data); // fallback if API returns array directly
         } else {
           setError("Unexpected response format or no medicines found.");
         }

@@ -21,12 +21,22 @@ const PatientsList: React.FC = () => {
     const fetchPatients = async () => {
       try {
         const res = await fetch("https://prms-test.onrender.com/api/patients");
-        const patientData = await res.json();
+        console.log("Response status:", res.status);
 
-        if (res.ok && Array.isArray(patientData.data)) {
-          setPatients(patientData.data);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not JSON");
+        }
+
+        const data = await res.json();
+        console.log("Fetched data:", data);
+
+        if (res.ok && Array.isArray(data.patients)) {
+          setPatients(data.patients);
+        } else if (res.ok && Array.isArray(data)) {
+          setPatients(data);
         } else {
-          setError("Unexpected response format or no patients found.");
+          setError(`Unexpected format: ${JSON.stringify(data)}`);
         }
       } catch (err) {
         console.error("Error fetching patients:", err);
