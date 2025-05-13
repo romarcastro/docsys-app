@@ -13,6 +13,7 @@ app.use(
     origin: [
       "https://docsys.onrender.com",
       "http://localhost:5173",
+      "http://localhost:3000",
       "https://prms-test.onrender.com",
       "https://pims-d.onrender.com",
     ],
