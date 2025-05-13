@@ -145,7 +145,6 @@ const CreatePrescriptionPage: React.FC = () => {
     dosageForm: string;
   }
   const [medicineDB, setMedicinesDB] = useState<Medicine[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMedicines = async () => {
@@ -159,12 +158,9 @@ const CreatePrescriptionPage: React.FC = () => {
           setMedicinesDB(data.data);
         } else if (res.ok && Array.isArray(data)) {
           setMedicinesDB(data); // fallback if API returns array directly
-        } else {
-          setError("Unexpected response format or no medicines found.");
         }
       } catch (err) {
         console.error("Error fetching medicines:", err);
-        setError("Failed to fetch medicines.");
       }
     };
 
