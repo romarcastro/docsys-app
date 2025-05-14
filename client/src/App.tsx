@@ -48,8 +48,7 @@ function App() {
 
           <Route path="/patients" element={<Patient />} />
 
-          {/* Catch-all route for unknown paths */}
-          <Route path="*" element={<div>Page Not Found</div>} />
+
         </Routes>
       </UserProvider>
     </div>
