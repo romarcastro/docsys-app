@@ -1,16 +1,17 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Navigate } from "react-router-dom";
 
 // Import your logo if you want
 import logo from "../assets/ignatius-logo.svg";
-import { auth, provider } from "../firebaseConfig"; 
+import { auth, provider } from "../firebaseConfig";
 import { signInWithPopup } from "firebase/auth";
 import { useUser } from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setName } = useUser();
+  const { setName, name } = useUser();
 
   const handleGoogleLogin = async () => {
     try {
@@ -27,6 +28,9 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  if (name) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-inter p-4">

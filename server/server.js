@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const { connectDB } = require("./config/db.js");
-const path = require("path");// Testing lang
 
 const prescriptionRoutes = require("./routes/prescriptions.route.js");
 
@@ -28,13 +27,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use("/api/prescriptions", prescriptionRoutes);
 
-// Testing lang
-app.use(express.static(path.join(__dirname, "../client/dist")));
-
-// Testing lang
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../client/dist/index.html"));
-});
 
 app.listen(PORT, () => {
   connectDB();
