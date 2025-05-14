@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Navigate } from "react-router-dom";
 
 // Import your logo if you want
 import logo from "../assets/ignatius-logo.svg";
@@ -11,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setName, name } = useUser();
+  const { setName } = useUser();
 
   const handleGoogleLogin = async () => {
     try {
@@ -27,10 +26,6 @@ const LoginPage: React.FC = () => {
       console.error("Google Sign-In Error", error);
     }
   };
-
-  if (name) {
-    return <Navigate to="/home" replace />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-inter p-4">
