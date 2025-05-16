@@ -5,6 +5,7 @@ const medicineSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     dosage: { type: String, required: true },
+    brand: { type: String, required: true },
     frequency: { type: Number, required: true },
     quantity: { type: Number, required: true },
   },
@@ -13,6 +14,11 @@ const medicineSchema = new mongoose.Schema(
 
 const prescriptionsSchema = new mongoose.Schema(
   {
+    patientId: {
+      type: String,
+      required: true,
+    },
+    dosage: { type: String, required: true },
     name: { type: String, required: true },
     age: { type: Number, required: true },
     gender: { type: String, required: true },

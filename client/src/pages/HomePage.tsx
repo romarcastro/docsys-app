@@ -38,7 +38,12 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [patientType, setPatientType] = useState<"new" | "existing" | null>(
     null
   );
-  const [formData, setFormData] = useState({ name: "", age: "", gender: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    gender: "",
+    patientId: "",
+  });
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +88,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       name: `${patient.firstName} ${patient.lastName}`,
       age: patient.age.toString(),
       gender: patient.gender,
+      patientId: patient.patientId,
     });
     setPatientType("existing");
     setStep(1);
@@ -110,7 +116,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (step === 1) {
       setStep(0);
       setPatientType(null);
-      setFormData({ name: "", age: "", gender: "" });
+      setFormData({ name: "", age: "", gender: "", patientId: "" });
     } else {
       onClose();
     }
@@ -124,7 +130,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md font-inter relative"
+          className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-3xl font-inter relative"
         >
           <button
             onClick={onClose}
@@ -138,6 +144,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <h2 className="text-lg font-semibold mb-4">
                 Search Existing Patient
               </h2>
+
               <input
                 type="text"
                 placeholder="Search by name or ID"
@@ -151,20 +158,36 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               {!loading && !error && filteredPatients.length === 0 && (
                 <p>No patients found.</p>
               )}
-
               {!loading && filteredPatients.length > 0 && (
-                <ul className="max-h-40 overflow-auto mb-4 border rounded p-2">
-                  {filteredPatients.map((p) => (
-                    <li
-                      key={p._id}
-                      className="cursor-pointer p-2 hover:bg-gray-100 rounded"
-                      onClick={() => handleSelectPatient(p)}
-                    >
-                      {p.patientId} - {p.firstName} {p.lastName} - Age: {p.age}{" "}
-                      - Gender: {p.gender}
-                    </li>
-                  ))}
-                </ul>
+                <div className="max-h-52 overflow-auto mb-6 border rounded">
+                  {/* Header row */}
+                  <div className="grid grid-cols-4 gap-2 font-semibold text-sm px-2 py-2 bg-gray-100 border-b">
+                    <span>Patient ID</span>
+                    <span>Name</span>
+                    <span>Age</span>
+                    <span>Gender</span>
+                  </div>
+
+                  {/* Patient list */}
+                  <ul className="divide-y">
+                    {filteredPatients.map((p) => (
+                      <li
+                        key={p._id}
+                        className="cursor-pointer px-2 py-3 hover:bg-gray-50"
+                        onClick={() => handleSelectPatient(p)}
+                      >
+                        <div className="grid grid-cols-4 gap-2 text-sm">
+                          <span>{p.patientId}</span>
+                          <span>
+                            {p.firstName} {p.lastName}
+                          </span>
+                          <span>{p.age}</span>
+                          <span>{p.gender}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <div className="flex gap-2">
@@ -173,7 +196,12 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   onClick={() => {
                     setPatientType("new");
                     setStep(1);
-                    setFormData({ name: "", age: "", gender: "" });
+                    setFormData({
+                      name: "",
+                      age: "",
+                      gender: "",
+                      patientId: "",
+                    });
                   }}
                 >
                   New Patient
@@ -195,31 +223,38 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   ? "New Patient Info"
                   : "Confirm Patient Info"}
               </h2>
+              <span className="font-semibold">Name</span>
+
               <input
+                title="Name"
                 type="text"
                 name="name"
                 placeholder="Name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full mb-2 p-2 border rounded"
+                className="w-full mb-2 mt-1 p-2 border rounded"
                 disabled={patientType === "existing"} // disable if existing patient
               />
+              <span className="font-semibold">Age</span>
+
               <input
                 type="number"
                 name="age"
                 placeholder="Age"
                 value={formData.age}
                 onChange={handleInputChange}
-                className="w-full mb-2 p-2 border rounded"
+                className="w-full mb-2  mt-1  p-2 border rounded"
                 disabled={patientType === "existing"}
               />
+              <span className="font-semibold">Gender</span>
+
               <input
                 type="text"
                 name="gender"
                 placeholder="Gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                className="w-full mb-4 p-2 border rounded"
+                className="w-full mb-4 mt-1  p-2 border rounded"
                 disabled={patientType === "existing"}
               />
               <div className="flex gap-2">

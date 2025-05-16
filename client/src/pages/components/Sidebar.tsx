@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
           <img src={prescription} alt="" />
           Prescriptions
         </button>
-        <button
+        {/* <button
           onClick={() => navigate("/medicines")}
           className="flex gap-2 items-center font-medium  p-1 rounded w-full text-left hover:translate-x-3 transition duration-150 ease-in-out"
         >
@@ -69,7 +69,7 @@ const Sidebar: React.FC = () => {
         >
           <img src={prescription} alt="" />
           Patients
-        </button>
+        </button> */}
       </nav>
 
       <nav className="space-y-2 mt-5">

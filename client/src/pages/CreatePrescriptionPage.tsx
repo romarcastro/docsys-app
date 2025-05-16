@@ -58,6 +58,7 @@ const CreatePrescriptionPage: React.FC = () => {
   // New prescription data
   const [newPrescription, setNewPrescription] = useState<{
     patientName: string;
+    patientId: string;
     doctorName: string;
     date: string;
     symptoms: string;
@@ -72,6 +73,7 @@ const CreatePrescriptionPage: React.FC = () => {
     }[];
   }>({
     patientName: "",
+    patientId: "",
     doctorName: "",
     date: new Date().toLocaleDateString(),
     symptoms: "",
@@ -94,6 +96,7 @@ const CreatePrescriptionPage: React.FC = () => {
       name: patient.name,
       age: patient.age,
       gender: patient.gender,
+      patientId: patient.patientId,
       dateOfPrescription: newPrescription.date,
       inscription: newPrescription.inscription,
       instructions: newPrescription.instructions,

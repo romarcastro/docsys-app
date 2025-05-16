@@ -18,6 +18,7 @@ type Prescription = {
   name: string;
   age: number;
   gender: string;
+  patientId: string;
   dateOfPrescription: string;
   doctorInformation: string;
   createdAt: string;
@@ -369,6 +370,12 @@ const AllPrescriptions: React.FC = () => {
                       <span className="font-semibold text-[14px]">Sex:</span>
                       <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
                         {selectedPrescription.gender}
+                      </span>
+                    </p>
+                    <p className="flex items-center w-full justify-between">
+                      <span className="font-semibold text-[14px]">Name:</span>
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                        {selectedPrescription.name}
                       </span>
                     </p>
                   </div>
