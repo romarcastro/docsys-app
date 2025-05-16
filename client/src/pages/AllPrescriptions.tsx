@@ -9,6 +9,7 @@ import html2canvas from "html2canvas";
 type Medicine = {
   name: string;
   dosage: string;
+  brand: string;
   frequency: number;
   quantity: number;
 };
@@ -385,6 +386,7 @@ const AllPrescriptions: React.FC = () => {
                             <p>
                               {idx + 1}. {med.name} — {med.dosage}
                             </p>
+                            <p>{med.brand}</p>
                             <p>
                               Sig: {med.frequency}x/day, Quantity:{" "}
                               {med.quantity}

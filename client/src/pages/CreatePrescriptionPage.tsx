@@ -7,13 +7,12 @@ import add from "../assets/icons/add.svg";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import rx from "../assets/icons/rx-icon.svg";
-
 const CreatePrescriptionPage: React.FC = () => {
   const [medicines, setMedicines] = useState<
     {
       name: string;
+      dosage: string;
       brand: string;
-      dosageForm: string;
       frequency: number;
       quantity: number;
     }[]
@@ -25,7 +24,7 @@ const CreatePrescriptionPage: React.FC = () => {
   const location = useLocation();
   const patient = location.state?.patient;
 
-  // Username
+  // User
   const { name } = useUser();
   const formatName = (fullName: string) => {
     if (!fullName) return "";
@@ -66,8 +65,8 @@ const CreatePrescriptionPage: React.FC = () => {
     instructions: string;
     inscription: {
       name: string;
+      dosage: string;
       brand: string;
-      dosageForm: string;
       frequency: number;
       quantity: number;
     }[];
@@ -100,7 +99,7 @@ const CreatePrescriptionPage: React.FC = () => {
       instructions: newPrescription.instructions,
       doctorInformation: newPrescription.doctorName,
     };
-    // Fetch Prescriptions
+
     try {
       const response = await fetch(
         "https://docsys-app-server.onrender.com/api/prescriptions",
@@ -137,30 +136,36 @@ const CreatePrescriptionPage: React.FC = () => {
       });
     }
   };
-
   interface Medicine {
+    _id: string;
     medicineId: string;
     name: string;
     brand: string;
     dosageForm: string;
+    quantity: number;
+    price: number;
+    expirationDate: string;
+    prescriptionRequired: boolean;
+    description: string;
   }
-  const [medicineDB, setMedicinesDB] = useState<Medicine[]>([]);
+  const [availableMedicines, setAvailableMedicines] = useState<Medicine[]>([]);
 
+  // Medicine
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
         const res = await fetch("https://pims-d.onrender.com/inventory");
-        console.log("Response status:", res.status);
         const data = await res.json();
-        console.log("Fetched data:", data);
 
         if (res.ok && Array.isArray(data.data)) {
-          setMedicinesDB(data.data);
+          setAvailableMedicines(data.data); // Use separate state to store available medicines
         } else if (res.ok && Array.isArray(data)) {
-          setMedicinesDB(data); // fallback if API returns array directly
+          setAvailableMedicines(data); // fallback
+        } else {
+          console.error("Unexpected response format");
         }
       } catch (err) {
-        console.error("Error fetching medicines:", err);
+        console.error("Failed to fetch medicines:", err);
       }
     };
 
@@ -171,31 +176,6 @@ const CreatePrescriptionPage: React.FC = () => {
     setShowModal(true);
   }
 
-  // Get Date
-  const [dateTime, setDateTime] = useState<string>("");
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      const formattedDate = now.toLocaleDateString(undefined, options);
-
-      let hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      hours = hours % 12 || 12;
-
-      const formattedTime = `${hours}:${minutes} ${ampm}`;
-      setDateTime(`Date: ${formattedDate} Time: ${formattedTime}`);
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
   return (
     <div className="min-h-screen font-inter">
       <Sidebar />
@@ -225,10 +205,7 @@ const CreatePrescriptionPage: React.FC = () => {
                 <div className="text-sm flex flex-col gap-1">
                   <div>
                     Prescription Date:{" "}
-                    <span className="font-medium">
-                      {" "}
-                      {dateTime.split("Date: ")[1]?.split(" Time:")[0]}
-                    </span>
+                    <span className="font-medium">January 20, 2025</span>
                   </div>
                   <div>
                     Prescription Type:{" "}
@@ -247,7 +224,6 @@ const CreatePrescriptionPage: React.FC = () => {
                     </label>
                     <textarea
                       value={newPrescription.symptoms}
-                      required
                       onChange={(e) =>
                         setNewPrescription({
                           ...newPrescription,
@@ -264,7 +240,6 @@ const CreatePrescriptionPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      required
                       value={newPrescription.subscription}
                       onChange={(e) =>
                         setNewPrescription({
@@ -324,7 +299,7 @@ const CreatePrescriptionPage: React.FC = () => {
                       >
                         <span className="w-1/4">{med.name}</span>
                         <span className="w-1/6">{med.brand}</span>
-                        <span className="w-1/6">{med.dosageForm}</span>
+                        <span className="w-1/6">{med.dosage}</span>
 
                         <div className="w-1/6 flex justify-center items-center space-x-2">
                           <button
@@ -445,7 +420,7 @@ const CreatePrescriptionPage: React.FC = () => {
               </div>
             </div>
             <button
-              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium p-2 rounded text-sm mt-4"
+              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium py-2 rounded text-sm mt-4"
               onClick={() => {
                 const { symptoms, subscription, instructions } =
                   newPrescription;
@@ -479,7 +454,6 @@ const CreatePrescriptionPage: React.FC = () => {
                   return;
                 }
 
-                // All validations passed
                 setStep("confirm");
               }}
             >
@@ -513,7 +487,7 @@ const CreatePrescriptionPage: React.FC = () => {
               <ul className="list-disc list-inside">
                 {medicines.map((med, index) => (
                   <li key={index}>
-                    {med.name} - {med.dosageForm} - {med.frequency}x/day -{" "}
+                    {med.name} - {med.dosage} - {med.frequency}x/day -{" "}
                     {med.quantity} pcs
                   </li>
                 ))}
@@ -549,12 +523,11 @@ const CreatePrescriptionPage: React.FC = () => {
                       <th className="border px-2 py-1 text-left">Drug Name</th>
                       <th className="border px-2 py-1 text-left">Dosage</th>
                       <th className="border px-2 py-1 text-left">Brand</th>
-
                       <th className="border px-2 py-1 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {medicineDB.map((drug, index) => (
+                    {availableMedicines.map((drug, index) => (
                       <tr key={index}>
                         <td className="border px-2 py-1">{drug.name}</td>
                         <td className="border px-2 py-1">{drug.dosageForm}</td>
@@ -595,27 +568,19 @@ const CreatePrescriptionPage: React.FC = () => {
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded"
                   onClick={() => {
-                    const selectedDetails = medicineDB
+                    const selectedDetails = availableMedicines
                       .filter((med) => selectedMedicines.includes(med.name))
                       .map((med) => ({
-                        medicineId: med.medicineId,
                         name: med.name,
-                        dosageForm: med.dosageForm,
                         brand: med.brand,
-
+                        dosage: med.dosageForm,
                         frequency: 0,
                         quantity: 0,
                       }));
 
-                    // Prevent duplicates
-                    const uniqueNewMeds = selectedDetails.filter(
-                      (newMed) =>
-                        !medicines.some((med) => med.name === newMed.name)
-                    );
-
-                    setMedicines([...medicines, ...uniqueNewMeds]);
-                    setShowModal(false);
+                    setMedicines((prev) => [...prev, ...selectedDetails]);
                     setSelectedMedicines([]);
+                    setShowModal(false);
                   }}
                 >
                   Confirm Selection

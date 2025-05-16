@@ -16,10 +16,21 @@ import logo from "../assets/ignatius-logo.svg";
 
 import blank from "../assets/blank-prescription.svg";
 import template from "../assets/template-prescription.svg";
-import newPatient from "../assets/icons/new-patient.svg";
-import existingPatient from "../assets/icons/existing-patient.svg";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
+
+interface Patient {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender: string;
+  age: number;
+  condition: string;
+  dateAdmitted: string;
+  address: string;
+  patientId: string;
+}
 
 const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(0);
@@ -28,17 +39,61 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     null
   );
   const [formData, setFormData] = useState({ name: "", age: "", gender: "" });
-  const isFormValid = formData.name && formData.age && formData.gender;
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handlePatientType = (type: "new" | "existing") => {
-    setPatientType(type);
+  // Fetch patients on modal open (step 0)
+  useEffect(() => {
+    const fetchPatients = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("https://prms-test.onrender.com/api/patients");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        if (Array.isArray(data.patients)) {
+          setPatients(data.patients);
+        } else if (Array.isArray(data)) {
+          setPatients(data);
+        } else {
+          setError("Unexpected data format from server");
+        }
+      } catch (err) {
+        setError("Failed to load patients.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  // Filter patients by search term (name or patientId)
+  const filteredPatients = patients.filter((p) => {
+    const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
+    return (
+      fullName.includes(searchTerm.toLowerCase()) ||
+      p.patientId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Handle selecting existing patient -> fills formData & go to next step
+  const handleSelectPatient = (patient: Patient) => {
+    setFormData({
+      name: `${patient.firstName} ${patient.lastName}`,
+      age: patient.age.toString(),
+      gender: patient.gender,
+    });
+    setPatientType("existing");
     setStep(1);
   };
 
+  // Handle new patient input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Navigate with patient data
   const handleWritePrescription = () => {
     if (patientType === "new") {
       const { name, age, gender } = formData;
@@ -47,7 +102,6 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         return;
       }
     }
-
     navigate("/create", { state: { patient: formData } });
     onClose();
   };
@@ -56,6 +110,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (step === 1) {
       setStep(0);
       setPatientType(null);
+      setFormData({ name: "", age: "", gender: "" });
     } else {
       onClose();
     }
@@ -73,130 +128,55 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 cursor-pointertext-xl text-gray-600 hover:text-gray-900"
+            className="absolute top-4 right-4 cursor-pointer text-xl text-gray-600 hover:text-gray-900"
           >
             ✕
           </button>
 
           {step === 0 && (
-            <div>
-              <h2 className="text-lg font-semibold">Write a prescription</h2>
-              <span>
-                Are you writing for a new patient or the patient has an existing
-                record?
-              </span>
-              <div className="flex gap-4">
-                <div
-                  className="flex flex-col items-center mt-4 border-2 border-gray-300 py-4 px-8 rounded-lg cursor-pointer hover:border-[#003459] transition ease-in"
-                  onClick={() => handlePatientType("new")}
-                >
-                  <img src={newPatient} alt="New Patient" />
-                  <label htmlFor="new-patient" className="ml-2">
-                    New Patient
-                  </label>
-                </div>
-
-                <div
-                  className="flex flex-col items-center mt-4 border-2 border-gray-300 py-4 px-8  rounded-lg cursor-pointer hover:border-[#003459] transition ease-in"
-                  onClick={() => handlePatientType("existing")}
-                >
-                  <img src={existingPatient} alt="Existing Patient" />
-                  <label htmlFor="existing-patient" className="mt-3">
-                    Existing Patient
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 1 && patientType === "new" && (
-            <div>
-              <h2 className="text-lg font-semibold mb-4">
-                New Patient Details
-              </h2>
-
-              <input
-                type="text"
-                name="name"
-                required
-                placeholder="Name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              <input
-                type="number"
-                name="age"
-                required
-                placeholder="Age"
-                value={formData.age}
-                onChange={handleInputChange}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              <div className="w-full my-3">
-                <label className="mr-4 font-medium">Gender:</label>
-                <label className="mr-4">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="Male"
-                    checked={formData.gender === "Male"}
-                    onChange={handleInputChange}
-                    className="mr-1"
-                  />
-                  Male
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="Female"
-                    checked={formData.gender === "Female"}
-                    onChange={handleInputChange}
-                    className="mr-1"
-                  />
-                  Female
-                </label>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  className={`px-4 py-2 rounded transition ease-in ${
-                    isFormValid
-                      ? "bg-[#00538D] text-white hover:bg-[#00528de7] cursor-pointer"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                  onClick={handleWritePrescription}
-                  disabled={!isFormValid}
-                >
-                  Write Prescription
-                </button>
-
-                <button
-                  className="border border-gray-400 text-[#00538D] px-4 py-2 rounded"
-                  onClick={handleBack}
-                >
-                  Go Back
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 1 && patientType === "existing" && (
-            <div>
+            <>
               <h2 className="text-lg font-semibold mb-4">
                 Search Existing Patient
               </h2>
               <input
                 type="text"
                 placeholder="Search by name or ID"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full mb-4 p-2 border rounded"
               />
+              {loading && <p>Loading patients...</p>}
+              {error && <p className="text-red-600">{error}</p>}
+
+              {!loading && !error && filteredPatients.length === 0 && (
+                <p>No patients found.</p>
+              )}
+
+              {!loading && filteredPatients.length > 0 && (
+                <ul className="max-h-40 overflow-auto mb-4 border rounded p-2">
+                  {filteredPatients.map((p) => (
+                    <li
+                      key={p._id}
+                      className="cursor-pointer p-2 hover:bg-gray-100 rounded"
+                      onClick={() => handleSelectPatient(p)}
+                    >
+                      {p.patientId} - {p.firstName} {p.lastName} - Age: {p.age}{" "}
+                      - Gender: {p.gender}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               <div className="flex gap-2">
                 <button
                   className="bg-[#00538D] text-white px-4 py-2 rounded hover:bg-[#00528de7] transition ease-in"
-                  onClick={handleWritePrescription}
+                  onClick={() => {
+                    setPatientType("new");
+                    setStep(1);
+                    setFormData({ name: "", age: "", gender: "" });
+                  }}
                 >
-                  Write Prescription
+                  New Patient
                 </button>
                 <button
                   className="border border-gray-400 text-[#00538D] px-4 py-2 rounded"
@@ -205,7 +185,59 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   Go Back
                 </button>
               </div>
-            </div>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <h2 className="text-lg font-semibold mb-4">
+                {patientType === "new"
+                  ? "New Patient Info"
+                  : "Confirm Patient Info"}
+              </h2>
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full mb-2 p-2 border rounded"
+                disabled={patientType === "existing"} // disable if existing patient
+              />
+              <input
+                type="number"
+                name="age"
+                placeholder="Age"
+                value={formData.age}
+                onChange={handleInputChange}
+                className="w-full mb-2 p-2 border rounded"
+                disabled={patientType === "existing"}
+              />
+              <input
+                type="text"
+                name="gender"
+                placeholder="Gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className="w-full mb-4 p-2 border rounded"
+                disabled={patientType === "existing"}
+              />
+              <div className="flex gap-2">
+                <button
+                  className="bg-[#00538D] text-white px-4 py-2 rounded hover:bg-[#00528de7] transition ease-in"
+                  onClick={handleWritePrescription}
+                  disabled={!formData.name || !formData.age || !formData.gender}
+                >
+                  Write Prescription
+                </button>
+                <button
+                  className="border border-gray-400 text-[#00538D] px-4 py-2 rounded"
+                  onClick={handleBack}
+                >
+                  Back
+                </button>
+              </div>
+            </>
           )}
         </motion.div>
       </AnimatePresence>
@@ -318,7 +350,9 @@ const HomePage: React.FC = () => {
         .from(modalContentRef.current)
         .set({
           margin: 0.5,
-          filename: `${selectedPrescription?.name || "prescription"} Prescription.pdf`,
+          filename: `${
+            selectedPrescription?.name || "prescription"
+          } Prescription.pdf`,
           html2canvas: { scale: 2 },
           jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
         })
@@ -335,7 +369,9 @@ const HomePage: React.FC = () => {
     if (modalContentRef.current) {
       const canvas = await html2canvas(modalContentRef.current);
       const link = document.createElement("a");
-      link.download = `${selectedPrescription?.name || "prescription"} Prescription.png`;
+      link.download = `${
+        selectedPrescription?.name || "prescription"
+      } Prescription.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     }
