@@ -211,8 +211,9 @@ const CreatePrescriptionPage: React.FC = () => {
                     <span className="font-medium">January 20, 2025</span>
                   </div>
                   <div>
-                    Prescription Type:{" "}
-                    <span className="font-medium">Common</span>
+                    <div className="text-sm">
+                      Patient ID: {patient?.patientId}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -284,6 +285,7 @@ const CreatePrescriptionPage: React.FC = () => {
                       <span className="font-medium w-1/4">Drug Name</span>
                       <span className="font-medium w-1/6">Brand</span>
                       <span className="font-medium w-1/6">Dosage</span>
+
                       <span className="font-medium w-1/6 text-center">
                         Frequency
                       </span>
@@ -476,6 +478,10 @@ const CreatePrescriptionPage: React.FC = () => {
               <p>
                 <strong>Patient:</strong> {patient?.name} (Age: {patient?.age})
               </p>
+              <div className="text-sm">
+                {" "}
+                <strong>Patient ID: </strong> {patient?.patientId}
+              </div>
               <p>
                 <strong>Symptoms:</strong> {newPrescription.symptoms}
               </p>
