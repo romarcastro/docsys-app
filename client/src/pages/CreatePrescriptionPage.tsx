@@ -428,7 +428,7 @@ const CreatePrescriptionPage: React.FC = () => {
               </div>
             </div>
             <button
-              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium py-2 rounded text-sm mt-4"
+              className="bg-[#0077B6] hover:bg-[#005f8f] text-white font-medium py-2 px-4 rounded text-sm mt-4"
               onClick={() => {
                 const { symptoms, subscription, instructions } =
                   newPrescription;

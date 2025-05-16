@@ -19,6 +19,7 @@ type Prescription = {
   age: number;
   gender: string;
   patientId: string;
+  email: string;
   dateOfPrescription: string;
   doctorInformation: string;
   createdAt: string;
@@ -356,7 +357,7 @@ const AllPrescriptions: React.FC = () => {
                   <div className="flex mb-4 text-lg">
                     <p className="flex items-center w-full justify-between">
                       <span className="font-semibold text-[14px]">Name:</span>
-                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[13px] ">
                         {selectedPrescription.name}
                       </span>
                     </p>
@@ -372,10 +373,21 @@ const AllPrescriptions: React.FC = () => {
                         {selectedPrescription.gender}
                       </span>
                     </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800 border-tpy-4 mb-4">
+                    {" "}
                     <p className="flex items-center w-full justify-between">
-                      <span className="font-semibold text-[14px]">Name:</span>
+                      <span className="font-semibold text-[14px]">
+                        Patient ID:
+                      </span>
                       <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
-                        {selectedPrescription.name}
+                        {selectedPrescription.patientId}
+                      </span>
+                    </p>
+                    <p className="flex items-center w-full justify-between">
+                      <span className="font-semibold text-[14px]">Email:</span>
+                      <span className="border-b border-gray-400 flex-grow text-center ml-2 text-[14px]">
+                        {selectedPrescription.email}
                       </span>
                     </p>
                   </div>
