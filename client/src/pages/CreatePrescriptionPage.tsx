@@ -60,6 +60,7 @@ const CreatePrescriptionPage: React.FC = () => {
     patientName: string;
     patientId: string;
     doctorName: string;
+    email: string;
     date: string;
     symptoms: string;
     subscription: string;
@@ -75,6 +76,7 @@ const CreatePrescriptionPage: React.FC = () => {
     patientName: "",
     patientId: "",
     doctorName: "",
+    email: "",
     date: new Date().toLocaleDateString(),
     symptoms: "",
     subscription: "",
@@ -97,6 +99,7 @@ const CreatePrescriptionPage: React.FC = () => {
       age: patient.age,
       gender: patient.gender,
       patientId: patient.patientId,
+      email: patient.email,
       dateOfPrescription: newPrescription.date,
       inscription: newPrescription.inscription,
       instructions: newPrescription.instructions,
