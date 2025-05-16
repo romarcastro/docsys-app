@@ -30,6 +30,7 @@ interface Patient {
   dateAdmitted: string;
   address: string;
   patientId: string;
+  email: string;
 }
 
 const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -43,6 +44,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     age: "",
     gender: "",
     patientId: "",
+    email: "",
   });
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,6 +91,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       age: patient.age.toString(),
       gender: patient.gender,
       patientId: patient.patientId,
+      email: patient.email,
     });
     setPatientType("existing");
     setStep(1);
@@ -116,7 +119,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (step === 1) {
       setStep(0);
       setPatientType(null);
-      setFormData({ name: "", age: "", gender: "", patientId: "" });
+      setFormData({ name: "", age: "", gender: "", patientId: "", email: "" });
     } else {
       onClose();
     }
@@ -201,6 +204,7 @@ const PrescriptionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       age: "",
                       gender: "",
                       patientId: "",
+                      email: "",
                     });
                   }}
                 >
