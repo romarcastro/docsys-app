@@ -16,6 +16,7 @@ app.use(
       "http://localhost:3000",
       "https://prms-test.onrender.com",
       "https://pims-d.onrender.com",
+      "https://pims-d-f.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -26,7 +27,6 @@ app.use(
 const PORT = process.env.PORT || 5000;
 
 app.use("/api/prescriptions", prescriptionRoutes);
-
 
 app.listen(PORT, () => {
   connectDB();
