@@ -17,6 +17,7 @@ app.use(
       "https://prms-test.onrender.com",
       "https://pims-d.onrender.com",
       "https://pims-d-f.vercel.app",
+      "https://simc-billing-system.onrender.com/",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
